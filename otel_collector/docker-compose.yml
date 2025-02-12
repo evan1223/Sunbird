@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-collector
+    user: 0:0
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./output:/output

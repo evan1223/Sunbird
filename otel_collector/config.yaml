@@ -1,0 +1,49 @@
+receivers:
+  fluentforward:
+    endpoint: 0.0.0.0:8006
+
+processors:
+  filter/logs/server:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'not (IsMatch(body, "Server Log*"))'
+  filter/logs/web:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'not (IsMatch(body, "Web Log*"))'
+  filter/logs/access:
+    error_mode: ignore
+    logs:
+      include:
+        match_type: regexp
+        record_attributes:
+          - key: log
+            value: ^(\S+) \S+ \S+ \[(.*?)\] "(.*?)" (\d{3}) (\d+)
+
+exporters:
+  file/server:
+    path: './output/server_logs.json'
+    append: true
+  file/web:
+    path: './output/web_logs.json'
+    append: true
+  file/access:
+    path: './output/access_logs.json'
+    append: true
+
+service:
+  pipelines:
+    logs/server:
+      receivers: [fluentforward]
+      processors: [filter/logs/server]
+      exporters: [file/server]
+    logs/web:
+      receivers: [fluentforward]
+      processors: [filter/logs/web]
+      exporters: [file/web]
+    logs/access:
+      receivers: [fluentforward]
+      processors: [filter/logs/access]
+      exporters: [file/access]

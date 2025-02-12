@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<!-- Console Appender -->
+		<Console name="ConsoleAppender" target="SYSTEM_OUT">
+			<PatternLayout pattern="Server Log:%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+		</Console>
+
+		<!-- General File Appender -->
+		<File name="FileAppender" fileName="/usr/local/tomcat/logs/tomcat.log">
+			<PatternLayout pattern="Server Log:%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n"/>
+		</File>
+
+	</Appenders>
+
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="ConsoleAppender"/>
+			<AppenderRef ref="FileAppender"/>
+		</Root>
+	</Loggers>
+</Configuration>
+

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  jpetstore:
+    image: jpetstore
+    container_name: jpetstore
+    ports:
+      - "8080:8080"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:8006
