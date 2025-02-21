@@ -3,6 +3,8 @@ receivers:
     endpoint: 0.0.0.0:8006
 
 processors:
+  batch:
+
   filter/logs/server:
     error_mode: ignore
     logs:
@@ -14,13 +16,11 @@ processors:
       log_record:
         - 'not (IsMatch(body, "Web Log*"))'
   filter/logs/access:
-    error_mode: ignore
     logs:
       include:
         match_type: regexp
-        record_attributes:
-          - key: log
-            value: ^(\S+) \S+ \S+ \[(.*?)\] "(.*?)" (\d{3}) (\d+)
+        bodies:
+          - ^(\S+) \S+ \S+ \[(.*?)\] "(.*?)" (\d{3}) (\d+)
 
 exporters:
   file/server:
@@ -32,6 +32,9 @@ exporters:
   file/access:
     path: './output/access_logs.json'
     append: true
+  debug:
+    verbosity: detailed
+
 
 service:
   pipelines:

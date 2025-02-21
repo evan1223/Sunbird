@@ -6,6 +6,8 @@ services:
     container_name: otel-collector
     user: 0:0
     ports:
+      - "4317:4317"  #OTLP gRPC receiver
+      - "4318:4318"  #OTLP http receiver
       - "8006:8006"
     volumes:
       - ./config.yaml:/etc/otelcol-contrib/config.yaml
