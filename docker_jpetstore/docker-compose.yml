@@ -10,3 +10,4 @@ services:
       driver: fluentd
       options:
         fluentd-address: localhost:8006
+        fluentd-buffer-limit: 1m

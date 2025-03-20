@@ -3,31 +3,37 @@ receivers:
     endpoint: 0.0.0.0:8006
 
 processors:
-  batch:
-    send_batch_size: 1000
-    timeout: 5s
+  batch: 
+    send_batch_size: 500
+    timeout: 10s
+
+  memory_limiter:
+    limit_mib: 512
+    spike_limit_mib: 128
+    check_interval: 5s
 
   filter/logs/server:
     error_mode: ignore
     logs:
       log_record:
-        - 'not (IsMatch(body, "Server Log*"))'
+        - 'not (IsMatch(body, "Server Log.*"))'
+
   filter/logs/web:
     error_mode: ignore
     logs:
       log_record:
-        - 'not (IsMatch(body, "Web Log*"))'
+        - 'not (IsMatch(body, "Web Log.*"))'
+
   filter/logs/access:
     logs:
       include:
         match_type: regexp
         bodies:
-          - ^(\S+) \S+ \S+ \[(.*?)\] "(.*?)" (\d{3}) (\d+)
+          - '^(\S+) \S+ \S+ \[(.*?)\] "(.*?)" (\d{3}) (\d+)'
 
 exporters:
   file/server:
     path: './output/server_logs.json'
-      #    append: true
     rotation:
       max_megabytes: 1
       max_days: 1
@@ -35,35 +41,35 @@ exporters:
 
   file/web:
     path: './output/web_logs.json'
-      #    append: true
     rotation:
       max_megabytes: 1
       max_days: 1
       localtime: true
-  
+
   file/access:
     path: './output/access_logs.json'
-#    append: true
     rotation:
       max_megabytes: 1
       max_days: 1
       localtime: true
-  
+
   debug:
     verbosity: detailed
-
 
 service:
   pipelines:
     logs/server:
       receivers: [fluentforward]
-      processors: [batch, filter/logs/server]
+      processors: [batch, memory_limiter, filter/logs/server]
       exporters: [file/server]
+
     logs/web:
       receivers: [fluentforward]
-      processors: [batch, filter/logs/web]
+      processors: [batch, memory_limiter, filter/logs/web]
       exporters: [file/web]
+
     logs/access:
       receivers: [fluentforward]
-      processors: [batch, filter/logs/access]
+      processors: [batch, memory_limiter, filter/logs/access]
       exporters: [file/access]
+
