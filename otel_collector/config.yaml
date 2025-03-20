@@ -4,6 +4,8 @@ receivers:
 
 processors:
   batch:
+    send_batch_size: 1000
+    timeout: 5s
 
   filter/logs/server:
     error_mode: ignore
@@ -25,13 +27,28 @@ processors:
 exporters:
   file/server:
     path: './output/server_logs.json'
-    append: true
+      #    append: true
+    rotation:
+      max_megabytes: 1
+      max_days: 1
+      localtime: true
+
   file/web:
     path: './output/web_logs.json'
-    append: true
+      #    append: true
+    rotation:
+      max_megabytes: 1
+      max_days: 1
+      localtime: true
+  
   file/access:
     path: './output/access_logs.json'
-    append: true
+#    append: true
+    rotation:
+      max_megabytes: 1
+      max_days: 1
+      localtime: true
+  
   debug:
     verbosity: detailed
 
@@ -40,13 +57,13 @@ service:
   pipelines:
     logs/server:
       receivers: [fluentforward]
-      processors: [filter/logs/server]
+      processors: [batch, filter/logs/server]
       exporters: [file/server]
     logs/web:
       receivers: [fluentforward]
-      processors: [filter/logs/web]
+      processors: [batch, filter/logs/web]
       exporters: [file/web]
     logs/access:
       receivers: [fluentforward]
-      processors: [filter/logs/access]
+      processors: [batch, filter/logs/access]
       exporters: [file/access]
