@@ -7,10 +7,17 @@ processors:
     send_batch_size: 500
     timeout: 10s
 
-  memory_limiter:
-    limit_mib: 512
-    spike_limit_mib: 128
-    check_interval: 5s
+  filter/webApp1:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'attributes["container_name"] == "/webApp1"'
+  
+  filter/webApp2:
+    error_mode: ignore
+    logs:
+      log_record:
+        - 'attributes["container_name"] == "/webApp2"'
 
   filter/logs/server:
     error_mode: ignore
@@ -32,44 +39,42 @@ processors:
           - '^(\S+) \S+ \S+ \[(.*?)\] "(.*?)" (\d{3}) (\d+)'
 
 exporters:
-  file/server:
-    path: './output/server_logs.json'
+  file/webApp1/server:
+    path: './output/webApp1_server_logs.json'
     rotation:
       max_megabytes: 1
       max_days: 1
-      localtime: true
+
+  file/webApp2/server:
+    path: './output/webApp2_server_logs.json'
+    rotation:
+      max_megabytes: 1
+      max_days: 1
 
   file/web:
     path: './output/web_logs.json'
     rotation:
       max_megabytes: 1
       max_days: 1
-      localtime: true
 
   file/access:
     path: './output/access_logs.json'
     rotation:
       max_megabytes: 1
       max_days: 1
-      localtime: true
 
   debug:
     verbosity: detailed
 
 service:
   pipelines:
-    logs/server:
+    logs/webApp1_server:
       receivers: [fluentforward]
-      processors: [batch, memory_limiter, filter/logs/server]
-      exporters: [file/server]
-
-    logs/web:
+      processors: [batch, filter/webApp1, filter/logs/server]
+      exporters: [file/webApp1/server]
+    
+    logs/webApp2_server:
       receivers: [fluentforward]
-      processors: [batch, memory_limiter, filter/logs/web]
-      exporters: [file/web]
-
-    logs/access:
-      receivers: [fluentforward]
-      processors: [batch, memory_limiter, filter/logs/access]
-      exporters: [file/access]
+      processors: [batch, filter/webApp2, filter/logs/server]
+      exporters: [file/webApp2/server]
 
